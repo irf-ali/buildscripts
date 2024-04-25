@@ -43,8 +43,6 @@
       ],
       "args": [
         "run",
-        "--rm",
-        "--shm-size=2g",
         "--platform",
         "linux/amd64",
         "--privileged",
