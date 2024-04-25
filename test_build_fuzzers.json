@@ -43,10 +43,11 @@
       ],
       "args": [
         "run",
+        "--rm", 
+        "--privileged", 
+        "--shm-size=2g",
         "--platform",
         "linux/amd64",
-        "--privileged",
-        "-i",
         "-e",
         "HELPER=True",
         "-e",
