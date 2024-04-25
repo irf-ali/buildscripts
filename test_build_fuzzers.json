@@ -57,6 +57,11 @@
       "id": "compile-libfuzzer-coverage-x86_64"
     },
     {
+      "name": "bash",
+      "script": "echo \"Listing build/out directory\" && ls build/out"
+      "dir": "oss-fuzz"
+    },
+    {
       "name": "gcr.io/cloud-builders/gsutil",
       "entrypoint": "sh",
       "args": [
