@@ -38,18 +38,19 @@
         "ARCHITECTURE=x86_64",
         "FUZZING_ENGINE=libfuzzer",
         "FUZZING_LANGUAGE=jvm",
-        "HOME=/root",
-        "OUT=/workspace/out/libfuzzer-coverage-x86_64",
-        "SANITIZER=coverage"
+        "SANITIZER=coverage",
+        "PROJECT_NAME=apache-commons-lang",
       ],
       "args": [
         "run",
+        "--rm",
+        "--shm-size=2g",
         "--platform",
         "linux/amd64",
-        "-v",
-        "/workspace:/workspace",
         "--privileged",
-        "--cap-add=all",
+        "-i",
+        "-e",
+        "HELPER=True",
         "-e",
         "ARCHITECTURE=x86_64",
         "-e",
@@ -57,17 +58,16 @@
         "-e",
         "FUZZING_LANGUAGE=jvm",
         "-e",
-        "HOME=/root",
-        "-e",
-        "OUT=/workspace/out/libfuzzer-coverage-x86_64",
+        "PROJECT_NAME=apache-commons-lang",
         "-e",
         "SANITIZER=coverage",
+        "-v",
+        "oss-fuzz/build/out/apache-commons-lang/:/out",
+        "-v",
+        "oss-fuzz/build/work/apache-commons-lang:/work",
         "-t",
         "gcr.io/oss-fuzz/apache-commons-lang",
-        "bash",
-        "-c",
-        "rm -r /out && cd /src && cd /src && mkdir -p /workspace/out/libfuzzer-coverage-x86_64 && compile || (echo \"********************************************************************************\nFailed to build.\nTo reproduce, run:\npython infra/helper.py build_image apache-commons-lang\npython infra/helper.py build_fuzzers --sanitizer coverage --engine libfuzzer --architecture x86_64 apache-commons-lang\n********************************************************************************\" && false)"
-      ],
+       ],
       "id": "compile-libfuzzer-coverage-x86_64"
     },
     {
@@ -75,7 +75,7 @@
       "entrypoint": "sh",
       "args": [
         "-c",
-        "gsutil -m rm -rf gs://irali-test-cloudbuild/apache-commons-lang/reports/20200101 || exit 0"
+        "gsutil -m rm -rf gs://irali-test-cloudbuild/apache-commons-lang/build/out || exit 0"
       ]
     },
     {
@@ -84,8 +84,8 @@
         "-m",
         "cp",
         "-r",
-        "/workspace/out/libfuzzer-coverage-x86_64/report",
-        "gs://irali-test-cloudbuild/apache-commons-lang/reports/20200101"
+        "oss-fuzz/build/out/apache-commons-lang/",
+        "gs://irali-test-cloudbuild/apache-commons-lang"
       ]
     }
   ]
