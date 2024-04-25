@@ -58,7 +58,7 @@
     },
     {
       "name": "bash",
-      "script": "echo \"Listing build/out directory\" && ls build/out"
+      "script": "echo \"Listing build/out directory\" && ls build/out",
       "dir": "oss-fuzz"
     },
     {
