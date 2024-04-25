@@ -48,9 +48,9 @@
         "-e",
         "SANITIZER=coverage",
         "-v",
-        "oss-fuzz/build/out/snakeyaml",
+        "/out/snakeyaml",
         "-v",
-        "oss-fuzz/build/work/snakeyaml",
+        "/work/snakeyaml",
         "-t",
         "gcr.io/oss-fuzz/snakeyaml",
        ],
@@ -58,8 +58,8 @@
     },
     {
       "name": "bash",
-      "script": "echo \"Listing oss-fuzz repository\" && ls",
-      "dir": "oss-fuzz"
+      "script": "echo \"Listing out directory\" && ls",
+      "dir": "out"
     },
     {
       "name": "gcr.io/cloud-builders/gsutil",
@@ -75,7 +75,7 @@
         "-m",
         "cp",
         "-r",
-        "oss-fuzz/build/out/snakeyaml",
+        "/out/snakeyaml",
         "gs://irali-test-cloudbuild/snakeyaml"
       ]
     }
