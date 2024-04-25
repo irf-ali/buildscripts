@@ -83,10 +83,9 @@
         "-m",
         "cp",
         "-r",
-        "build/out/apache-commons-lang/",
+        "oss-fuzz/build/out/apache-commons-lang",
         "gs://irali-test-cloudbuild/apache-commons-lang"
-      ],
-      "dir": "oss-fuzz"
+      ]
     }
   ]
 }
