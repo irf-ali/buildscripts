@@ -1,0 +1,90 @@
+[
+  {
+    "args": [
+      "clone",
+      "https://github.com/google/oss-fuzz.git",
+      "--depth",
+      "1"
+    ],
+    "name": "gcr.io/cloud-builders/git"
+  },
+  {
+    "name": "gcr.io/cloud-builders/docker",
+    "args": [
+      "build",
+      "--tag",
+      "gcr.io/oss-fuzz/apache-commons-lang",
+      "."
+    ],
+    "dir": "oss-fuzz/projects/apache-commons-lang"
+  },
+  {
+    "name": "gcr.io/oss-fuzz/apache-commons-lang",
+    "args": [
+      "bash",
+      "-c",
+      "srcmap > /workspace/srcmap.json && cat /workspace/srcmap.json"
+    ],
+    "env": [
+      "OSSFUZZ_REVISION=$REVISION_ID",
+      "FUZZING_LANGUAGE=jvm"
+    ],
+    "id": "srcmap"
+  },
+  {
+    "name": "gcr.io/cloud-builders/docker",
+    "env": [
+      "ARCHITECTURE=x86_64",
+      "FUZZING_ENGINE=libfuzzer",
+      "FUZZING_LANGUAGE=jvm",
+      "HOME=/root",
+      "OUT=/workspace/out/libfuzzer-coverage-x86_64",
+      "SANITIZER=coverage"
+    ],
+    "args": [
+      "run",
+      "--platform",
+      "linux/amd64",
+      "-v",
+      "/workspace:/workspace",
+      "--privileged",
+      "--cap-add=all",
+      "-e",
+      "ARCHITECTURE=x86_64",
+      "-e",
+      "FUZZING_ENGINE=libfuzzer",
+      "-e",
+      "FUZZING_LANGUAGE=jvm",
+      "-e",
+      "HOME=/root",
+      "-e",
+      "OUT=/workspace/out/libfuzzer-coverage-x86_64",
+      "-e",
+      "SANITIZER=coverage",
+      "-t",
+      "gcr.io/oss-fuzz/apache-commons-lang",
+      "bash",
+      "-c",
+      "rm -r /out && cd /src && cd /src && mkdir -p /workspace/out/libfuzzer-coverage-x86_64 && compile || (echo \"********************************************************************************\nFailed to build.\nTo reproduce, run:\npython infra/helper.py build_image apache-commons-lang\npython infra/helper.py build_fuzzers --sanitizer coverage --engine libfuzzer --architecture x86_64 apache-commons-lang\n********************************************************************************\" && false)"
+    ],
+    "id": "compile-libfuzzer-coverage-x86_64"
+  },
+  {
+    "name": "gcr.io/cloud-builders/gsutil",
+    "entrypoint": "sh",
+    "args": [
+      "-c",
+      "gsutil -m rm -rf gs://irali-test-cloudbuild/apache-commons-lang/reports/20200101 || exit 0"
+    ]
+  },
+  {
+    "name": "gcr.io/cloud-builders/gsutil",
+    "args": [
+      "-m",
+      "cp",
+      "-r",
+      "/workspace/out/libfuzzer-coverage-x86_64/report",
+      "gs://irali-test-cloudbuild/apache-commons-lang/reports/20200101"
+    ]
+  },
+]
