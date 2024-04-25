@@ -14,23 +14,10 @@
       "args": [
         "build",
         "--tag",
-        "gcr.io/oss-fuzz/apache-commons-lang",
+        "gcr.io/oss-fuzz/snakeyaml",
         "."
       ],
-      "dir": "oss-fuzz/projects/apache-commons-lang"
-    },
-    {
-      "name": "gcr.io/oss-fuzz/apache-commons-lang",
-      "args": [
-        "bash",
-        "-c",
-        "srcmap > /workspace/srcmap.json && cat /workspace/srcmap.json"
-      ],
-      "env": [
-        "OSSFUZZ_REVISION=$REVISION_ID",
-        "FUZZING_LANGUAGE=jvm"
-      ],
-      "id": "srcmap"
+      "dir": "oss-fuzz/projects/snakeyaml"
     },
     {
       "name": "gcr.io/cloud-builders/docker",
@@ -39,7 +26,7 @@
         "FUZZING_ENGINE=libfuzzer",
         "FUZZING_LANGUAGE=jvm",
         "SANITIZER=coverage",
-        "PROJECT_NAME=apache-commons-lang",
+        "PROJECT_NAME=snakeyaml",
       ],
       "args": [
         "run",
@@ -57,15 +44,15 @@
         "-e",
         "FUZZING_LANGUAGE=jvm",
         "-e",
-        "PROJECT_NAME=apache-commons-lang",
+        "PROJECT_NAME=snakeyaml",
         "-e",
         "SANITIZER=coverage",
         "-v",
-        "oss-fuzz/build/out/apache-commons-lang",
+        "oss-fuzz/build/out/snakeyaml",
         "-v",
-        "oss-fuzz/build/work/apache-commons-lang",
+        "oss-fuzz/build/work/snakeyaml",
         "-t",
-        "gcr.io/oss-fuzz/apache-commons-lang",
+        "gcr.io/oss-fuzz/snakeyaml",
        ],
       "id": "compile-libfuzzer-coverage-x86_64"
     },
@@ -74,7 +61,7 @@
       "entrypoint": "sh",
       "args": [
         "-c",
-        "gsutil -m rm -rf gs://irali-test-cloudbuild/apache-commons-lang/build/out || exit 0"
+        "gsutil -m rm -rf gs://irali-test-cloudbuild/snakeyaml/build/out || exit 0"
       ]
     },
     {
@@ -83,8 +70,8 @@
         "-m",
         "cp",
         "-r",
-        "oss-fuzz/build/out/apache-commons-lang",
-        "gs://irali-test-cloudbuild/apache-commons-lang"
+        "oss-fuzz/build/out/snakeyaml",
+        "gs://irali-test-cloudbuild/snakeyaml"
       ]
     }
   ]
