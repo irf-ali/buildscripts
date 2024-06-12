@@ -1,0 +1,77 @@
+{
+  "pipelineSpec":  {
+    "tasks":  [
+      {
+        "name":  "merge-exec-files",
+        "taskSpec":  {
+          "taskSpec":  {
+            "steps":  [
+              {
+                "name" : "jacococli.jar download",
+                "image": "gcr.io/cloud-builders/gsutil",
+                "args": [
+                  "cp",
+                  "gs://ftginputgentest/jacoco/jacococli.jar",
+                  "."
+                ],
+              },
+              {
+                "name": "exec files and src download",
+                "name": "gcr.io/cloud-builders/gsutil",
+                "args": [
+                  "-m",
+                  "cp",
+                  "-r",
+                  "gs://ftginputgentest/jacoco/CoverageTest",
+                  "."
+                ],
+              },
+              {
+                "name": "run cli tool",
+                "image": "openjdk:11",
+                "entrypoint": "bash",
+                "args": [
+                  "-c",
+                  "java -jar jacococli.jar report CoverageTest/FuzzParse.exec CoverageTest/FuzzStreamParser.exec CoverageTest/FuzzReader.exec  --classfiles CoverageTest/Classes/ --xml TestMergeCoverage.xml  --sourcefiles CoverageTest/Src/"
+                ],
+              },
+              {
+                "name": "Push xml report",
+                "image": "gcr.io/cloud-builders/gsutil",
+                "args": [
+                  "cp",
+                  "TestMergeCoverage.xml",
+                  "gs://ftginputgentest/jacoco"
+                ],
+              }
+            ],
+            "workspaces":  [
+              {
+                "name":  "shared-workspace"
+              }
+            ]
+          }
+        },
+        "workspaces":  [
+          {
+            "name":  "shared-workspace"
+          }
+        ],
+        "timeout":  "28800s"
+      }
+    ],
+    "workspaces":  [
+      {
+        "name":  "shared-workspace"
+      }
+    ]
+  },
+  "workspaces":  [
+    {
+      "name":  "shared-workspace",
+      "volumeClaim":  {
+        "storage":  "10gb"
+      }
+    }
+  ]
+}
