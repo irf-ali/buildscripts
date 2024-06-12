@@ -1,8 +1,7 @@
 {
   "steps":[
     {
-      "name": "get-jacococli-jar",
-      "image": "gcr.io/cloud-builders/gsutil",
+      "name": "gcr.io/cloud-builders/gsutil",
       "args": [
         "cp",
         "gs://ftginputgentest/jacoco/jacococli.jar",
@@ -11,8 +10,7 @@
       "workingDir": "/workspace/shared-workspace/covTest"
     },
     {
-      "name": "get-covfiles",
-      "image": "gcr.io/cloud-builders/gsutil",
+      "name": "gcr.io/cloud-builders/gsutil",
       "args": [
         "-m",
         "cp",
@@ -32,8 +30,7 @@
       "workingDir": "/workspace/shared-workspace/covTest"
     },
     {
-      "name": "push-xml-report",
-      "image": "gcr.io/cloud-builders/gsutil",
+      "name": "gcr.io/cloud-builders/gsutil",
       "args": [
         "cp",
         "TestMergeCoverage.xml",
