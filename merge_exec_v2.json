@@ -11,10 +11,7 @@
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "-c",
-                  "gsutil",
-                  "cp",
-                  "gs://ftginputgentest/jacoco/jacococli.jar",
-                  "."
+                  "gsutil cp gs://ftginputgentest/jacoco/jacococli.jar ."
                 ],
                 "command":  [
                   "/bin/bash"
@@ -26,12 +23,7 @@
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "-c",
-                  "gsutil",
-                  "-m",
-                  "cp",
-                  "-r",
-                  "gs://ftginputgentest/jacoco/CoverageTest",
-                  "."
+                  "gsutil -m cp -r gs://ftginputgentest/jacoco/CoverageTest ."
                 ],
                 "command":  [
                   "/bin/bash"
@@ -55,10 +47,7 @@
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "-c",
-                  "gsutil",
-                  "cp",
-                  "TestMergeCoverage.xml",
-                  "gs://ftginputgentest/jacoco"
+                  "gsutil cp TestMergeCoverage.xml gs://ftginputgentest/jacoco"
                 ],
                 "command":  [
                   "/bin/bash"
