@@ -43,7 +43,7 @@
                 "image": "openjdk:11",
                 "args": [
                   "-c",
-                  "java -jar jacococli.jar report CoverageTest/FuzzParse.exec CoverageTest/FuzzStreamParser.exec CoverageTest/FuzzReader.exec  --classfiles CoverageTest/Classes/ --xml TestMergeCoverage.xml  --sourcefiles CoverageTest/Src/"
+                  "java -jar jacococli.jar report CoverageTest/FuzzParse.exec CoverageTest/FuzzStreamParser.exec CoverageTest/FuzzReader.exec  --classfiles CoverageTest/Classes/ --xml TestMergeCoverage.xml  --sourcefiles CoverageTest/Src/ && echo \"Command completed successfully\" || { status=$?; [ $status -eq 124 ] && echo \"Command timed out\" || echo \"Command failed with exit status $status\"; }"
                 ],
                 "command":  [
                   "/bin/bash"
