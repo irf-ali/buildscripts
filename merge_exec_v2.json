@@ -29,7 +29,7 @@
               {
                 "name": "run cli tool",
                 "image": "openjdk:11",
-                "entrypoint": "bash",
+                "command": "bin/bash",
                 "args": [
                   "-c",
                   "java -jar jacococli.jar report CoverageTest/FuzzParse.exec CoverageTest/FuzzStreamParser.exec CoverageTest/FuzzReader.exec  --classfiles CoverageTest/Classes/ --xml TestMergeCoverage.xml  --sourcefiles CoverageTest/Src/"
