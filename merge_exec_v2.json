@@ -66,6 +66,15 @@
       }
     ]
   },
+  "serviceAccount":  "projects/cloud-aoss-dev/serviceAccounts/cloud-build-gcb-workflow@cloud-aoss-dev.iam.gserviceaccount.com",
+  "options":  {
+    "executionEnvironment":  {
+      "workerPool":  "projects/cloud-aoss-dev/locations/us-central1/workerPools/gcb-managed-container"
+    },
+    "timeouts":  {
+      "pipeline":  "28800s"
+    }
+  },
   "workspaces":  [
     {
       "name":  "shared-workspace",
