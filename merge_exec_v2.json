@@ -10,39 +10,60 @@
                 "name" : "jacococli-jar-download",
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
+                  "-c",
+                  "gsutil",
                   "cp",
                   "gs://ftginputgentest/jacoco/jacococli.jar",
                   "."
                 ],
+                "command":  [
+                  "/bin/bash"
+                ],
+                "workingDir": "/workspace/shared-workspace/covTest"
               },
               {
                 "name": "exec-files-download",
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
+                  "-c",
+                  "gsutil",
                   "-m",
                   "cp",
                   "-r",
                   "gs://ftginputgentest/jacoco/CoverageTest",
                   "."
                 ],
+                "command":  [
+                  "/bin/bash"
+                ],
+                "workingDir": "/workspace/shared-workspace/covTest"
               },
               {
                 "name": "run-cli-tool",
                 "image": "openjdk:11",
-                "command": "bin/bash",
                 "args": [
                   "-c",
                   "java -jar jacococli.jar report CoverageTest/FuzzParse.exec CoverageTest/FuzzStreamParser.exec CoverageTest/FuzzReader.exec  --classfiles CoverageTest/Classes/ --xml TestMergeCoverage.xml  --sourcefiles CoverageTest/Src/"
                 ],
+                "command":  [
+                  "/bin/bash"
+                ],
+                "workingDir": "/workspace/shared-workspace/covTest"
               },
               {
                 "name": "push-xml-report",
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
+                  "-c",
+                  "gsutil",
                   "cp",
                   "TestMergeCoverage.xml",
                   "gs://ftginputgentest/jacoco"
                 ],
+                "command":  [
+                  "/bin/bash"
+                ],
+                "workingDir": "/workspace/shared-workspace/covTest"
               }
             ],
             "workspaces":  [
