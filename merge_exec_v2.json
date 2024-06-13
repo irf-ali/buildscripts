@@ -7,7 +7,7 @@
           "taskSpec":  {
             "steps":  [
               {
-                "name" : "jacococli.jar download",
+                "name" : "jacococli-jar-download",
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "cp",
@@ -16,8 +16,8 @@
                 ],
               },
               {
-                "name": "exec files and src download",
-                "name": "gcr.io/cloud-builders/gsutil",
+                "name": "exec-files-download",
+                "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "-m",
                   "cp",
@@ -27,7 +27,7 @@
                 ],
               },
               {
-                "name": "run cli tool",
+                "name": "run-cli-tool",
                 "image": "openjdk:11",
                 "command": "bin/bash",
                 "args": [
@@ -36,7 +36,7 @@
                 ],
               },
               {
-                "name": "Push xml report",
+                "name": "push-xml-report",
                 "image": "gcr.io/cloud-builders/gsutil",
                 "args": [
                   "cp",
