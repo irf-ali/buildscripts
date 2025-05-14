@@ -92,6 +92,9 @@ steps:
   args:
   - -c
   - 'gsutil -m cp -r . gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/compiler_dump/"$(date +"%Y-%m-%d_%H-%M-%S")"/'
+options:
+  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 substitutions:
   _PACKAGE_NAME: "org.slf4j:slf4j-api"
   _RUN_ID: "34d00275-959a-4458-8fb6-8f3c26e92ba7"
