@@ -37,6 +37,30 @@ steps:
   args:
   - -c
   - 'mkdir .mvn && gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_EXTENSIONS_XML_SUBPATH} . && mv extensions.xml .mvn/'
+- name: gcr.io/cloud-builders/mvn
+  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'mkdir pulled_dependencies && mkdir localrepo && mvn -e -U dependency:copy-dependencies -DoutputDirectory=./pulled_dependencies -s settings.xml -Dmaven.repo.local=localrepo && ls pulled_dependencies'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'rm -rf oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && mv ${_OSS_FUZZ_PROJECT_NAME} oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && ls oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME}'
+- name: gcr.io/cloud-builders/docker
+  dir: /workspace/shared-workspace/build/oss-fuzz
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'python3 infra/helper.py build_fuzzers --sanitizer coverage ${_OSS_FUZZ_PROJECT_NAME}'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build/oss-fuzz
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_RUN_FUZZERS_SCRIPT_SUBPATH} .'
 options:
   logging: CLOUD_LOGGING_ONLY
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
