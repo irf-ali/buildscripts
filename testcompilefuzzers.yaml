@@ -1,0 +1,103 @@
+timeout: 28800s
+steps:
+- name: gcr.io/cloud-builders/wget
+  dir: /workspace/shared-workspace/compile/all-deps
+  entrypoint: wget
+  args:
+  - '${_PACKAGE_JAR_URL}'
+  - '-O'
+  - '${_PACKAGE_ARTIFACT_ID}.jar'
+  - '-N'
+  - '-q'
+- name: gcr.io/cloud-builders/wget
+  dir: /workspace/shared-workspace/compile/all-deps
+  entrypoint: wget
+  args:
+  - '${_JAZZER_JAR_URL}'
+  - '-O'
+  - jazzer.jar
+  - '-N'
+  - '-q'
+- name: gcr.io/cloud-builders/wget
+  dir: /workspace/shared-workspace/compile/package
+  entrypoint: wget
+  args:
+  - '${_PACKAGE_POM_URL}'
+  - '-O'
+  - pom.xml
+  - '-N'
+  - '-q'
+- name: gcr.io/cloud-builders/wget
+  dir: /workspace/shared-workspace/compile/jazzer
+  entrypoint: wget
+  args:
+  - '${_JAZZER_POM_URL}'
+  - '-O'
+  - pom.xml
+  - '-N'
+  - '-q'
+- name: gcr.io/cloud-builders/mvn
+  dir: /workspace/shared-workspace/compile/jazzer
+  entrypoint: mvn
+  args:
+  - dependency:copy-dependencies
+  - '-DoutputDirectory=/workspace/shared-workspace/compile/all-deps'
+  - '-q'
+- name: gcr.io/cloud-builders/mvn
+  dir: /workspace/shared-workspace/compile/package
+  entrypoint: mvn
+  args:
+  - dependency:copy-dependencies
+  - '-DoutputDirectory=/workspace/shared-workspace/compile/all-deps'
+  - '-q'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/compile
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r "gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/generated_fuzzers" ./ '
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/compile
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r "gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/processed_fuzzers" ./ '
+- name: gcr.io/cloud-builders/javac
+  dir: /workspace/shared-workspace/compile/generated_fuzzers
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for fuzzer in ${_FUZZER_LIST}; do javac $fuzzer -cp "/workspace/shared-workspace/compile/all-deps/*";{ status=$?; if [ $status -eq 0 ]; then echo "Compilation success for $fuzzer" ; echo "$fuzzer " ; else echo "Compilation failed with exit status $status for $fuzzer" ; echo "$fuzzer " ; fi ; } ; done || exit 0'
+- name: gcr.io/cloud-builders/javac
+  dir: /workspace/shared-workspace/compile/processed_fuzzers
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for fuzzer in ${_FUZZER_LIST}; do javac $fuzzer -cp "/workspace/shared-workspace/compile/all-deps/*";{ status=$?; if [ $status -eq 0 ]; then echo "Compilation success for $fuzzer" ; echo "$fuzzer " ; else echo "Compilation failed with exit status $status for $fuzzer" ; echo "$fuzzer " ; fi ; } ; done || exit 0'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/compile/generated_fuzzers
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for file in ./*.class; do [ -e "$file" ] && base_name="${file%.class}" && gsutil cp "$base_name".java gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/compilable_fuzzers/ && echo "Successfully uploaded $base_name.java" || { status=$?; echo "Failed to upload $base_name.java with exit status $status"; }; done || true'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/compile/processed_fuzzers
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for file in ./*.class; do [ -e "$file" ] && base_name="${file%.class}" && gsutil cp "$base_name".java gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/compilable_fuzzers/ && echo "Successfully uploaded $base_name.java" || { status=$?; echo "Failed to upload $base_name.java with exit status $status"; }; done || true'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/compile
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r . gs://javafuzztestgeneration/${_PACKAGE_NAME}/${_RUN_ID}/compiler_dump/"$(date +"%Y-%m-%d_%H-%M-%S")"/'
+substitutions:
+  _PACKAGE_NAME: "org.slf4j:slf4j-api"
+  _RUN_ID: "34d00275-959a-4458-8fb6-8f3c26e92ba7"
+  _PACKAGE_ARTIFACT_ID: "org.slf4j:slf4j-api"
+  _PACKAGE_JAR_URL: "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.11/slf4j-api-2.0.11.jar"
+  _JAZZER_JAR_URL: "https://repo1.maven.org/maven2/com/code-intelligence/jazzer/0.22.1/jazzer-0.22.1.jar"
+  _PACKAGE_POM_URL: "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.11/slf4j-api-2.0.11.pom"
+  _JAZZER_POM_URL: "https://repo1.maven.org/maven2/com/code-intelligence/jazzer/0.22.1/jazzer-0.22.1.pom"
+  _FUZZER_LIST: "Fuzzer1.java Fuzzer2.java Fuzzer3.java Fuzzer10.java"
