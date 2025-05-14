@@ -145,4 +145,4 @@ substitutions:
   _AOSS_POM_DOWNLOAD_URL: "https://artifactregistry.googleapis.com/download/v1/projects/cloud-aoss/locations/us/repositories/cloud-aoss-java/files/org%2Fslf4j%2Fslf4j-api%2F2.0.11%2Fslf4j-api-2.0.11.pom:download?alt=media"
   _ARTIFACT_ID: "slf4j-api"
   _VERSION: "2.0.11"
-  _FUZZER_LIST: "Fuzzer1 Fuzzer3 Fuzzer10"
+  _FUZZER_LIST: "Fuzzer1,Fuzzer3,Fuzzer10"
