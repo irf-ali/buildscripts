@@ -12,55 +12,55 @@ steps:
   entrypoint: /bin/bash
   args:
   - -c
-    'gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/compilable_fuzzers . && mkdir -p ${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts && mv compilable_fuzzers/* ${_OSS_FUZZ_PROJECT_NAME}/'
+  - 'gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/compilable_fuzzers . && mkdir -p ${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts && mv compilable_fuzzers/* ${_OSS_FUZZ_PROJECT_NAME}/'
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
-    curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.jar  "${_AOSS_JAR_DOWNLOAD_URL}"
+  - curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.jar  "${_AOSS_JAR_DOWNLOAD_URL}"
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
-    curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.pom  "${_AOSS_POM_DOWNLOAD_URL}" && mv ${_ARTIFACT_ID}-${_VERSION}.pom pom.xml
+  - curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.pom  "${_AOSS_POM_DOWNLOAD_URL}" && mv ${_ARTIFACT_ID}-${_VERSION}.pom pom.xml
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_SETTINGS_XML_SUBPATH} .
+  - gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_SETTINGS_XML_SUBPATH} .
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
-    mkdir .mvn && gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_EXTENSIONS_XML_SUBPATH} . && mv extensions.xml .mvn/
+  - mkdir .mvn && gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_EXTENSIONS_XML_SUBPATH} . && mv extensions.xml .mvn/
 - name: gcr.io/cloud-builders/mvn
   dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
-    mkdir pulled_dependencies && mkdir localrepo && mvn -e -U dependency:copy-dependencies -DoutputDirectory=./pulled_dependencies -s settings.xml -Dmaven.repo.local=localrepo && ls pulled_dependencies
+  - mkdir pulled_dependencies && mkdir localrepo && mvn -e -U dependency:copy-dependencies -DoutputDirectory=./pulled_dependencies -s settings.xml -Dmaven.repo.local=localrepo && ls pulled_dependencies
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    rm -rf oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && mv ${_OSS_FUZZ_PROJECT_NAME} oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && ls oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME}
+  - rm -rf oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && mv ${_OSS_FUZZ_PROJECT_NAME} oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME} && ls oss-fuzz/projects/${_OSS_FUZZ_PROJECT_NAME}
 - name: gcr.io/cloud-builders/docker
   dir: /workspace/shared-workspace/build/oss-fuzz
   entrypoint: /bin/bash
   args:
   - -c
-    python3 infra/helper.py build_fuzzers --sanitizer coverage ${_OSS_FUZZ_PROJECT_NAME}
+  - python3 infra/helper.py build_fuzzers --sanitizer coverage ${_OSS_FUZZ_PROJECT_NAME}
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build/oss-fuzz
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_RUN_FUZZERS_SCRIPT_SUBPATH} .
+  - gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_RUN_FUZZERS_SCRIPT_SUBPATH} .
 - name: gcr.io/cloud-builders/docker
   dir: /workspace/shared-workspace/build/oss-fuzz
   entrypoint: /bin/bash
@@ -85,49 +85,49 @@ steps:
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r logs/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/logs/
+  - gsutil -m cp -r logs/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/logs/
 - name: gcr.io/cloud-builders/docker
   dir: /workspace/shared-workspace/build/oss-fuzz
   entrypoint: /bin/bash
   args:
   - -c
-    python3 infra/helper.py coverage --no-serve ${_OSS_FUZZ_PROJECT_NAME} --no-corpus-download
+  - python3 infra/helper.py coverage --no-serve ${_OSS_FUZZ_PROJECT_NAME} --no-corpus-download
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    'for fuzzer in ${_FUZZER_LIST}; do file="oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+  - 'for fuzzer in ${_FUZZER_LIST}; do file="oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/jacoco.merged.exec gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/jacoco.merged_"$(date +"%Y-%m-%d_%H-%M-%S").exec"
+  - gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/jacoco.merged.exec gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/jacoco.merged_"$(date +"%Y-%m-%d_%H-%M-%S").exec"
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    'for file in oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+  - 'for file in oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r oss-fuzz/build/corpus/${_OSS_FUZZ_PROJECT_NAME}/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/corpus/
+  - gsutil -m cp -r oss-fuzz/build/corpus/${_OSS_FUZZ_PROJECT_NAME}/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/corpus/
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/classes/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Classes/
+  - gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/classes/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Classes/
 - name: gcr.io/cloud-builders/gsutil
   dir: /workspace/shared-workspace/build
   entrypoint: /bin/bash
   args:
   - -c
-    gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/report/linux/jacoco.xml gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/jacoco_"$(date +"%Y-%m-%d_%H-%M-%S").xml"
+  - gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/report/linux/jacoco.xml gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/jacoco_"$(date +"%Y-%m-%d_%H-%M-%S").xml"
 options:
   logging: CLOUD_LOGGING_ONLY
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
