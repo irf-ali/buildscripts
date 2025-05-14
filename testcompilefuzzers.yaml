@@ -98,7 +98,7 @@ options:
 substitutions:
   _PACKAGE_NAME: "org.slf4j:slf4j-api"
   _RUN_ID: "34d00275-959a-4458-8fb6-8f3c26e92ba7"
-  _PACKAGE_ARTIFACT_ID: "org.slf4j:slf4j-api"
+  _PACKAGE_ARTIFACT_ID: "slf4j-api"
   _PACKAGE_JAR_URL: "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.11/slf4j-api-2.0.11.jar"
   _JAZZER_JAR_URL: "https://repo1.maven.org/maven2/com/code-intelligence/jazzer/0.22.1/jazzer-0.22.1.jar"
   _PACKAGE_POM_URL: "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.11/slf4j-api-2.0.11.pom"
