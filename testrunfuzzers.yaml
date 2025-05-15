@@ -72,6 +72,60 @@ steps:
     - 'FUZZER_LIST=${_FUZZER_LIST}'
     - 'OSS_FUZZ_PROJECT_NAME=${_OSS_FUZZ_PROJECT_NAME}'
     - 'FUZZING_DURATION=${_FUZZING_DURATION}'
+- name: gcr.io/cloud-builders/docker
+  dir: /workspace/shared-workspace/build/oss-fuzz
+  entrypoint: /bin/bash
+  args:
+    - -c
+    - 'for fuzzer in ${_FUZZER_LIST}; do dir=build/corpus/${_OSS_FUZZ_PROJECT_NAME}/$fuzzer ; if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then mv logs/run_logs/successful_fuzzers/$fuzzer.txt logs/run_logs/empty_corpus_fuzzers/$fuzzer.txt ; fi; done'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build/oss-fuzz
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r logs/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/logs/'
+- name: gcr.io/cloud-builders/docker
+  dir: /workspace/shared-workspace/build/oss-fuzz
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'python3 infra/helper.py coverage --no-serve ${_OSS_FUZZ_PROJECT_NAME} --no-corpus-download'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for fuzzer in ${_FUZZER_LIST}; do file="oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/jacoco.merged.exec gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Exec/jacoco.merged_"$(date +"%Y-%m-%d_%H-%M-%S").exec"'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'for file in oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r oss-fuzz/build/corpus/${_OSS_FUZZ_PROJECT_NAME}/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/corpus/'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/dumps/classes/* gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/Classes/'
+- name: gcr.io/cloud-builders/gsutil
+  dir: /workspace/shared-workspace/build
+  entrypoint: /bin/bash
+  args:
+  - -c
+  - 'gsutil -m cp -r oss-fuzz/build/out/${_OSS_FUZZ_PROJECT_NAME}/report/linux/jacoco.xml gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/jacoco_"$(date +"%Y-%m-%d_%H-%M-%S").xml"'
 options:
   logging: CLOUD_LOGGING_ONLY
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
