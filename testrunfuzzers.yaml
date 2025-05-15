@@ -15,31 +15,31 @@ steps:
   - -c
   - 'gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/compilable_fuzzers . && mkdir -p ${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts && mv compilable_fuzzers/* ${_OSS_FUZZ_PROJECT_NAME}/'
 - name: gcr.io/cloud-builders/gsutil
-  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
   - 'curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.jar  "${_AOSS_JAR_DOWNLOAD_URL}"'
 - name: gcr.io/cloud-builders/gsutil
-  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
   - 'curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output ${_ARTIFACT_ID}-${_VERSION}.pom  "${_AOSS_POM_DOWNLOAD_URL}" && mv ${_ARTIFACT_ID}-${_VERSION}.pom pom.xml'
 - name: gcr.io/cloud-builders/gsutil
-  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
   - 'gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_SETTINGS_XML_SUBPATH} .'
 - name: gcr.io/cloud-builders/gsutil
-  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
   - 'mkdir .mvn && gsutil -m cp -r gs://${_GCS_BUCKET}/${_PACKAGE_NAME}/${_FTG_RUNID}/${_MAVEN_EXTENSIONS_XML_SUBPATH} . && mv extensions.xml .mvn/'
 - name: gcr.io/cloud-builders/mvn
-  dir: /workspace/shared-workspace/build/org.slf4j_slf4j-api/aoss_artifacts
+  dir: /workspace/shared-workspace/build/${_OSS_FUZZ_PROJECT_NAME}/aoss_artifacts
   entrypoint: /bin/bash
   args:
   - -c
@@ -143,4 +143,4 @@ substitutions:
   _AOSS_POM_DOWNLOAD_URL: "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.11/slf4j-api-2.0.11.pom"
   _ARTIFACT_ID: "slf4j-api"
   _VERSION: "2.0.11"
-  _FUZZER_LIST: "Fuzzer1,Fuzzer3,Fuzzer10"
+  _FUZZER_LIST: "Fuzzer1 Fuzzer3 Fuzzer10"
