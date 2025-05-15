@@ -69,12 +69,9 @@ steps:
     - -c
     - 'chmod +x run_fuzzers.sh && ./run_fuzzers.sh'
   env:
-  - name: 'FUZZER_LIST'
-    value: '${_FUZZER_LIST}'
-  - name: 'OSS_FUZZ_PROJECT_NAME'
-    value: '${_OSS_FUZZ_PROJECT_NAME}'
-  - name: 'FUZZING_DURATION'
-    value: '${_FUZZING_DURATION}'
+    - 'FUZZER_LIST=${_FUZZER_LIST}'
+    - 'OSS_FUZZ_PROJECT_NAME=${_OSS_FUZZ_PROJECT_NAME}'
+    - 'FUZZING_DURATION=${_FUZZING_DURATION}'
 options:
   logging: CLOUD_LOGGING_ONLY
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
