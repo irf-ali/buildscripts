@@ -115,7 +115,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'gsutil -m cp -r logs/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/logs/'
+      - 'gsutil -m cp -r logs/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/logs/'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-logss'
@@ -123,7 +123,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'if [ -d "crashes" ]; then gsutil -m cp -r crashes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/crashes/; else echo "crashes directory not found, skipping upload"; fi'
+      - 'if [ -d "crashes" ]; then gsutil -m cp -r crashes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/crashes/; else echo "crashes directory not found, skipping upload"; fi'
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'run-coverage'
@@ -139,7 +139,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'for fuzzer in Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89; do file="oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+      - 'for fuzzer in Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89; do file="oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-merged-exec'
@@ -147,7 +147,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/jacoco.merged.exec gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Exec/jacoco.merged_`date +"%Y-%m-%d_%H-%M-%S"`.exec'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/jacoco.merged.exec gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/Exec/jacoco.merged_`date +"%Y-%m-%d_%H-%M-%S"`.exec'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-xml-files'
@@ -155,7 +155,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'for file in oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+      - 'for file in oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-corpus'
@@ -163,7 +163,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'gsutil -m cp -r oss-fuzz/build/corpus/org.codehaus.jettison_jettison/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/corpus/ || true'
+      - 'gsutil -m cp -r oss-fuzz/build/corpus/org.codehaus.jettison_jettison/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/corpus/ || true'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-classes'
@@ -171,7 +171,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/classes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Classes/'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/classes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/Classes/'
 
   - name: 'gcr.io/cloud-builders/gsutil'
     id: 'upload-jacoco'
@@ -179,7 +179,7 @@ steps:
     entrypoint: '/bin/bash'
     args:
       - '-c'
-      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/report/linux/jacoco.xml gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/jacoco_`date +"%Y-%m-%d_%H-%M-%S"`.xml'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/report/linux/jacoco.xml gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/test/jacoco_`date +"%Y-%m-%d_%H-%M-%S"`.xml'
 
 options:
   logging: CLOUD_LOGGING_ONLY
