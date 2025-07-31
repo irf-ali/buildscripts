@@ -1,0 +1,192 @@
+steps:
+  - name: 'gcr.io/cloud-builders/git'
+    id: 'clone-oss-fuzz'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: 'git'
+    args:
+      - 'clone'
+      - 'https://github.com/google/oss-fuzz.git'
+      - 'oss-fuzz'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'download-project-folder'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/compilable_fuzzers . && mkdir -p org.codehaus.jettison_jettison/aoss_artifacts && mv compilable_fuzzers/* org.codehaus.jettison_jettison/'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'download-aoss-jar'
+    dir: '/workspace/shared-workspace/build/org.codehaus.jettison_jettison/aoss_artifacts'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output jettison-1.4.1.jar  "https://repo1.maven.org/maven2/org/codehaus/jettison/jettison/1.4.1/jettison-1.4.1.jar"'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'download-aoss-pom'
+    dir: '/workspace/shared-workspace/build/org.codehaus.jettison_jettison/aoss_artifacts'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'curl -X GET -H "Authorization: Bearer $(gcloud auth print-access-token)" --output jettison-1.4.1.pom  "https://repo1.maven.org/maven2/org/codehaus/jettison/jettison/1.4.1/jettison-1.4.1.pom" && mv jettison-1.4.1.pom pom.xml'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'fetch-maven-settings-xml'
+    dir: '/workspace/shared-workspace/build/org.codehaus.jettison_jettison/aoss_artifacts'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/gcb_build_scripts/runfuzztests/2025-07-25_09-38-02_8122bc82-ec7b-4f16-912c-13bc0bdba075/settings.xml .'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'fetch-maven-extensions-xml'
+    dir: '/workspace/shared-workspace/build/org.codehaus.jettison_jettison/aoss_artifacts'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'mkdir .mvn && gsutil -m cp -r gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/gcb_build_scripts/runfuzztests/2025-07-25_09-38-02_8122bc82-ec7b-4f16-912c-13bc0bdba075/extensions.xml . && mv extensions.xml .mvn/'
+
+  - name: 'gcr.io/cloud-builders/mvn'
+    id: 'pull-aoss-dependencies'
+    dir: '/workspace/shared-workspace/build/org.codehaus.jettison_jettison/aoss_artifacts'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'mkdir pulled_dependencies && mkdir localrepo && mvn -e -U dependency:copy-dependencies -DoutputDirectory=./pulled_dependencies -s settings.xml -Dmaven.repo.local=localrepo && ls pulled_dependencies'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'move-project-to-oss-fuzz'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'rm -rf oss-fuzz/projects/org.codehaus.jettison_jettison && mv org.codehaus.jettison_jettison oss-fuzz/projects/org.codehaus.jettison_jettison && ls oss-fuzz/projects/org.codehaus.jettison_jettison'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-fuzzers'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'python3 infra/helper.py build_fuzzers --sanitizer coverage org.codehaus.jettison_jettison'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'fetch-run-fuzzers-script'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/gcb_build_scripts/runfuzztests/2025-07-25_09-38-02_8122bc82-ec7b-4f16-912c-13bc0bdba075/run_fuzzers.sh .'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'run-fuzzers'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'chmod +x run_fuzzers.sh && ./run_fuzzers.sh'
+    env:
+      - 'FUZZER_LIST=Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89'
+      - 'OSS_FUZZ_PROJECT_NAME=org.codehaus.jettison_jettison'
+      - 'FUZZING_DURATION=20s'
+      - 'MAX_PARALLEL_FUZZ_TESTS=1'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'empty-corpus-fuzz-tests'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - |
+        for fuzzer in Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89; do
+        dir=build/corpus/org.codehaus.jettison_jettison/$fuzzer;
+        if [ -d "$dir" ]; then
+        if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+        mv logs/run_logs/successful_fuzzers/$fuzzer.txt logs/run_logs/empty_corpus_fuzzers/$fuzzer.txt;
+        fi;
+        fi;
+        done
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-logs'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r logs/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/logs/'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-logss'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'if [ -d "crashes" ]; then gsutil -m cp -r crashes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/crashes/; else echo "crashes directory not found, skipping upload"; fi'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'run-coverage'
+    dir: '/workspace/shared-workspace/build/oss-fuzz'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'python3 infra/helper.py coverage --no-serve org.codehaus.jettison_jettison --no-corpus-download'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-exec-files'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'for fuzzer in Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89; do file="oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/$fuzzer.exec"; [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Exec/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-merged-exec'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/jacoco.merged.exec gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Exec/jacoco.merged_`date +"%Y-%m-%d_%H-%M-%S"`.exec'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-xml-files'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'for file in oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/*.xml; do [ -e "$file" ] && gsutil cp "$file" gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/xml/ && echo "Successfully uploaded $file" || { status=$?; echo "Failed to upload $file with exit status $status"; }; done'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-corpus'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r oss-fuzz/build/corpus/org.codehaus.jettison_jettison/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/corpus/ || true'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-classes'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/dumps/classes/* gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/Classes/'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: 'upload-jacoco'
+    dir: '/workspace/shared-workspace/build'
+    entrypoint: '/bin/bash'
+    args:
+      - '-c'
+      - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/report/linux/jacoco.xml gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/jacoco_`date +"%Y-%m-%d_%H-%M-%S"`.xml'
+
+options:
+  machineType: 'CUSTOM_MACHINE_TYPE_NAME'
+  diskSizeGb: '200'
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-managed-1'
+
+timeout: 28800s
+serviceAccount: 'projects/cloud-aoss-dev/serviceAccounts/cloud-build-gcb-workflow@cloud-aoss-dev.iam.gserviceaccount.com'
