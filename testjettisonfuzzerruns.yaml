@@ -182,11 +182,7 @@ steps:
       - 'gsutil -m cp -r oss-fuzz/build/out/org.codehaus.jettison_jettison/report/linux/jacoco.xml gs://javafuzztestgeneration/org.codehaus.jettison:jettison/9ba41d64-2707-4423-ad8c-f80652bb9e59/jacoco_`date +"%Y-%m-%d_%H-%M-%S"`.xml'
 
 options:
-  machineType: 'CUSTOM_MACHINE_TYPE_NAME'
-  diskSizeGb: '200'
-  env:
-    - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=gcb-managed-1'
+  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 
 timeout: 28800s
-serviceAccount: 'projects/cloud-aoss-dev/serviceAccounts/cloud-build-gcb-workflow@cloud-aoss-dev.iam.gserviceaccount.com'
