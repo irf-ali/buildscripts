@@ -90,7 +90,7 @@ steps:
     env:
       - 'FUZZER_LIST=Fuzzer0 Fuzzer1 Fuzzer12 Fuzzer14 Fuzzer15 Fuzzer16 Fuzzer17 Fuzzer18 Fuzzer2 Fuzzer20 Fuzzer21 Fuzzer22 Fuzzer23 Fuzzer24 Fuzzer25 Fuzzer26 Fuzzer27 Fuzzer28 Fuzzer3 Fuzzer30 Fuzzer35 Fuzzer36 Fuzzer37 Fuzzer38 Fuzzer39 Fuzzer4 Fuzzer40 Fuzzer41 Fuzzer42 Fuzzer43 Fuzzer44 Fuzzer46 Fuzzer47 Fuzzer48 Fuzzer49 Fuzzer5 Fuzzer50 Fuzzer51 Fuzzer52 Fuzzer59 Fuzzer6 Fuzzer60 Fuzzer61 Fuzzer62 Fuzzer63 Fuzzer64 Fuzzer65 Fuzzer7 Fuzzer72 Fuzzer73 Fuzzer79 Fuzzer8 Fuzzer81 Fuzzer86 Fuzzer87 Fuzzer88 Fuzzer89'
       - 'OSS_FUZZ_PROJECT_NAME=org.codehaus.jettison_jettison'
-      - 'FUZZING_DURATION=20s'
+      - 'FUZZING_DURATION=60s'
       - 'MAX_PARALLEL_FUZZ_TESTS=1'
 
   - name: 'gcr.io/cloud-builders/docker'
